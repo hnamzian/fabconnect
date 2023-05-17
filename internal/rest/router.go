@@ -20,9 +20,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"strings"
 
-	"github.com/hyperledger/firefly-fabconnect/internal/auth"
 	"github.com/hyperledger/firefly-fabconnect/internal/errors"
 	"github.com/hyperledger/firefly-fabconnect/internal/events"
 	"github.com/hyperledger/firefly-fabconnect/internal/messages"
@@ -107,19 +105,19 @@ func (r *router) newAccessTokenContextHandler() http.Handler {
 	return http.HandlerFunc(func(res http.ResponseWriter, req *http.Request) {
 
 		// Extract an access token from bearer token (only - no support for query params)
-		accessToken := ""
-		hSplit := strings.SplitN(req.Header.Get("Authorization"), " ", 2)
-		if len(hSplit) == 2 && strings.ToLower(hSplit[0]) == "bearer" {
-			accessToken = hSplit[1]
-		}
-		authCtx, err := auth.WithAuthContext(req.Context(), accessToken)
-		if err != nil {
-			log.Errorf("Error getting auth context: %s", err)
-			errors.RestErrReply(res, req, fmt.Errorf("Unauthorized"), 401)
-			return
-		}
+		// accessToken := ""
+		// hSplit := strings.SplitN(req.Header.Get("Authorization"), " ", 2)
+		// if len(hSplit) == 2 && strings.ToLower(hSplit[0]) == "bearer" {
+		// 	accessToken = hSplit[1]
+		// }
+		// authCtx, err := auth.WithAuthContext(req.Context(), accessToken)
+		// if err != nil {
+		// 	log.Errorf("Error getting auth context: %s", err)
+		// 	errors.RestErrReply(res, req, fmt.Errorf("Unauthorized"), 401)
+		// 	return
+		// }
 
-		r.httpRouter.ServeHTTP(res, req.WithContext(authCtx))
+		r.httpRouter.ServeHTTP(res, req)
 	})
 }
 
@@ -177,6 +175,8 @@ func (r *router) getTransaction(res http.ResponseWriter, req *http.Request, para
 }
 
 func (r *router) sendTransaction(res http.ResponseWriter, req *http.Request, params httprouter.Params) {
+	fmt.Printf("Router sendTransaction\n")
+
 	log.Infof("--> %s %s", req.Method, req.URL)
 
 	msg, opts, err := restutil.BuildTxMessage(res, req, params)
