@@ -144,15 +144,18 @@ func (w *idClientWrapper) Register(res http.ResponseWriter, req *http.Request, p
 		}
 	}
 
-	secret, err := w.caClient.Register(rr)
+	// Modified to use remote register
+	secret, err := remoteRegister(rr)
+
+	// secret, err := w.caClient.Register(rr)
 	if err != nil {
 		log.Errorf("Failed to register user %s. %s", regreq.Name, err)
 		return nil, restutil.NewRestError(err.Error())
 	}
 
 	result := identity.RegisterResponse{
-		Name:   rr.Name,
-		Secret: secret,
+		Name:   regreq.Name,
+		Secret: string(secret),
 	}
 	return &result, nil
 }
@@ -207,20 +210,21 @@ func (w *idClientWrapper) Enroll(res http.ResponseWriter, req *http.Request, par
 		return nil, restutil.NewRestError(`missing required parameter "secret"`, 400)
 	}
 
-	input := mspApi.EnrollmentRequest{
-		Name:    username,
-		Secret:  enreq.Secret,
-		CAName:  enreq.CAName,
-		Profile: enreq.Profile,
-	}
-	if enreq.AttrReqs != nil {
-		input.AttrReqs = []*mspApi.AttributeRequest{}
-		for attr, optional := range enreq.AttrReqs {
-			input.AttrReqs = append(input.AttrReqs, &mspApi.AttributeRequest{Name: attr, Optional: optional})
-		}
-	}
+	// input := mspApi.EnrollmentRequest{
+	// 	Name:    username,
+	// 	Secret:  enreq.Secret,
+	// 	CAName:  enreq.CAName,
+	// 	Profile: enreq.Profile,
+	// }
+	// if enreq.AttrReqs != nil {
+	// 	input.AttrReqs = []*mspApi.AttributeRequest{}
+	// 	for attr, optional := range enreq.AttrReqs {
+	// 		input.AttrReqs = append(input.AttrReqs, &mspApi.AttributeRequest{Name: attr, Optional: optional})
+	// 	}
+	// }
 
-	err = w.caClient.Enroll(&input)
+	_, err = remoteEnroll(username)
+	// err = w.caClient.Enroll(&input)
 	if err != nil {
 		log.Errorf("Failed to enroll user %s. %s", enreq.Name, err)
 		return nil, restutil.NewRestError(err.Error())
@@ -289,7 +293,8 @@ func (w *idClientWrapper) Revoke(res http.ResponseWriter, req *http.Request, par
 		GenCRL: enreq.GenCRL,
 	}
 
-	response, err := w.caClient.Revoke(&input)
+	response, err := remoteRevoke(input)
+	// response, err := w.caClient.Revoke(&input)
 	if err != nil {
 		log.Errorf("Failed to revoke certificate for user %s. %s", enreq.Name, err)
 		return nil, restutil.NewRestError(err.Error())
