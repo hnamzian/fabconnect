@@ -18,6 +18,7 @@ package fabric
 
 import (
 	"context"
+	"fmt"
 	"sync"
 	"time"
 
@@ -64,6 +65,8 @@ func (tx *Tx) GetTXReceipt(ctx context.Context, rpc client.RPCClient) (bool, err
 
 // Send sends an individual transaction
 func (tx *Tx) Send(ctx context.Context, rpc client.RPCClient) error {
+	fmt.Printf("Send Tx: %+v\n", rpc)
+	
 	start := time.Now().UTC()
 
 	var receipt *client.TxReceipt

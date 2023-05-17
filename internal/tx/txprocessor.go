@@ -100,6 +100,7 @@ func (p *txProcessor) GetRPCClient() client.RPCClient {
 //    on txnContext eventually in all scenarios.
 //    It cannot return an error synchronously from this function **
 func (p *txProcessor) OnMessage(txContext TxContext) {
+	fmt.Println("OnMessage, TxContext: ", txContext)
 
 	var unmarshalErr error
 	headers := txContext.Headers()
@@ -279,6 +280,7 @@ func (p *txProcessor) trackMining(inflight *inflightTx, tx *fabric.Tx) {
 // }
 
 func (p *txProcessor) OnSendTransactionMessage(txContext TxContext, msg *messages.SendTransaction) {
+	fmt.Printf("OnSendTransactionMessage\n")
 
 	inflight, err := p.addInflightWrapper(txContext, &msg.RequestCommon)
 	if err != nil {
@@ -291,6 +293,8 @@ func (p *txProcessor) OnSendTransactionMessage(txContext TxContext, msg *message
 }
 
 func (p *txProcessor) sendTransactionCommon(txContext TxContext, inflight *inflightTx, tx *fabric.Tx) {
+	fmt.Printf("sendTransactionCommon\n")
+
 	if p.config.SendConcurrency > 1 {
 		// The above must happen synchronously for each partition in Kafka - as it is where we assign the nonce.
 		// However, the send to the node can happen at high concurrency.
@@ -303,6 +307,8 @@ func (p *txProcessor) sendTransactionCommon(txContext TxContext, inflight *infli
 }
 
 func (p *txProcessor) sendAndTrackMining(txContext TxContext, inflight *inflightTx, tx *fabric.Tx) {
+	fmt.Printf("Send and Tranck Mining")
+
 	err := tx.Send(txContext.Context(), inflight.rpc)
 	if p.config.SendConcurrency > 1 {
 		<-p.concurrencySlots // return our slot as soon as send is complete, to let an awaiting send go

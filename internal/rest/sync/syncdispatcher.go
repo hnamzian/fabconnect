@@ -158,6 +158,7 @@ func (i *syncResponder) ReplyWithReceipt(receipt messages.ReplyWithHeaders) {
 
 // handles transactions that require tracking transaction results
 func (d *syncDispatcher) DispatchMsgSync(ctx context.Context, res http.ResponseWriter, req *http.Request, msg interface{}) {
+	fmt.Printf("DispatchMsgSync Msg: %v\n", msg)
 	responder := &syncResponder{
 		res:    res,
 		req:    req,

@@ -34,6 +34,7 @@ import (
 //
 func RPCConnect(c conf.RPCConf, txTimeout int) (RPCClient, identity.IdentityClient, error) {
 	configProvider := config.FromFile(c.ConfigPath)
+	// implement remote userStore
 	userStore, err := newUserstore(configProvider)
 	if err != nil {
 		return nil, nil, errors.Errorf("User credentials store creation failed. %s", err)
