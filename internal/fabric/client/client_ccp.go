@@ -17,6 +17,7 @@
 package client
 
 import (
+	"fmt"
 	"sync"
 
 	"github.com/hyperledger/fabric-sdk-go/pkg/client/channel"
@@ -30,6 +31,7 @@ import (
 	"github.com/hyperledger/fabric-sdk-go/pkg/fabsdk"
 	mspImpl "github.com/hyperledger/fabric-sdk-go/pkg/msp"
 	"github.com/hyperledger/firefly-fabconnect/internal/errors"
+	remoteIdentity "github.com/hyperledger/firefly-fabconnect/internal/fabric/remote/identity"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -143,13 +145,21 @@ func (w *ccpRPCWrapper) SignerUpdated(signer string) {
 func (w *ccpRPCWrapper) getChannelClient(channelId string, signer string) (*ccpClientWrapper, error) {
 	w.mu.Lock()
 	defer w.mu.Unlock()
-	id, err := w.idClient.GetSigningIdentity(signer)
+
+	// id, err := w.idClient.GetSigningIdentity(signer)
+	id, err := remoteIdentity.NewSigningIdentity("Org1MSP", signer, "localhost:4000")
+	if err != nil {
+		return nil, errors.Errorf("Failed to get signing identity: %s", err)
+	}
 	if err == msp.ErrUserNotFound {
 		return nil, errors.Errorf("Signer %s does not exist", signer)
 	}
 	if err != nil {
 		return nil, errors.Errorf("Failed to retrieve signing identity: %s", err)
 	}
+	fmt.Printf("remote id: %v\n", id)
+
+
 
 	allClientsOfChannel := w.channelClients[channelId]
 	if allClientsOfChannel == nil {
@@ -157,8 +167,16 @@ func (w *ccpRPCWrapper) getChannelClient(channelId string, signer string) (*ccpC
 	}
 	clientOfUser := w.channelClients[channelId][id.Identifier().ID]
 	if clientOfUser == nil {
-		channelProvider := w.sdk.ChannelContext(channelId, fabsdk.WithOrg(w.idClient.GetClientOrg()), fabsdk.WithUser(id.Identifier().ID))
+		//////////////////////////////
+		fmt.Printf("ClientOrg: %v\n", w.idClient.GetClientOrg())
+		fmt.Printf("User: %v\n", id.Identifier().ID)
+
+		// ToDo: try passing WithIdentity(id) instead of WithUser("a6")
+		channelProvider := w.sdk.ChannelContext(channelId, fabsdk.WithOrg(w.idClient.GetClientOrg()), fabsdk.WithIdentity(id))
+		fmt.Printf("111111111111111111")
 		cClient, err := w.channelCreator(channelProvider)
+		fmt.Printf("22222222222222222")
+
 		if err != nil {
 			return nil, err
 		}
