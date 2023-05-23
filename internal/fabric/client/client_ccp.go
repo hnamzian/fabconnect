@@ -147,7 +147,7 @@ func (w *ccpRPCWrapper) getChannelClient(channelId string, signer string) (*ccpC
 	defer w.mu.Unlock()
 
 	// id, err := w.idClient.GetSigningIdentity(signer)
-	id, err := remoteIdentity.NewSigningIdentity("Org1MSP", signer, "localhost:4000")
+	id, err := remoteIdentity.NewSigningIdentity("Org1MSP", signer, "oneof_wallet:4000")
 	if err != nil {
 		return nil, errors.Errorf("Failed to get signing identity: %s", err)
 	}
@@ -167,15 +167,9 @@ func (w *ccpRPCWrapper) getChannelClient(channelId string, signer string) (*ccpC
 	}
 	clientOfUser := w.channelClients[channelId][id.Identifier().ID]
 	if clientOfUser == nil {
-		//////////////////////////////
-		fmt.Printf("ClientOrg: %v\n", w.idClient.GetClientOrg())
-		fmt.Printf("User: %v\n", id.Identifier().ID)
-
 		// ToDo: try passing WithIdentity(id) instead of WithUser("a6")
 		channelProvider := w.sdk.ChannelContext(channelId, fabsdk.WithOrg(w.idClient.GetClientOrg()), fabsdk.WithIdentity(id))
-		fmt.Printf("111111111111111111")
 		cClient, err := w.channelCreator(channelProvider)
-		fmt.Printf("22222222222222222")
 
 		if err != nil {
 			return nil, err

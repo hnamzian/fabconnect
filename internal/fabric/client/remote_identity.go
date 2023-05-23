@@ -31,8 +31,8 @@ type SignRequest struct {
 }
 
 func remoteRegister(regReq *mspApi.RegistrationRequest) (string, error) {
-	// send POST request to http://localhost:4000/fabric/identities/:username
-	posturl := "http://localhost:4000/fabric-cryptosuit/identities/" + regReq.Name
+	// send POST request to http://oneof_wallet:4000/fabric/identities/:username
+	posturl := "http://oneof_wallet:4000/fabric-cryptosuit/identities/" + regReq.Name
 
 	rr := &RemoteRegisterRequest{
 		Name:           regReq.Name,
@@ -82,8 +82,8 @@ func remoteRegister(regReq *mspApi.RegistrationRequest) (string, error) {
 }
 
 func remoteEnroll(enrollmentID string) ([]byte, error) {
-	// send POST request to http://localhost:4000/fabric/identities/:username/enroll
-	posturl := "http://localhost:4000/fabric-cryptosuit/identities/" + enrollmentID + "/enroll"
+	// send POST request to http://oneof_wallet:4000/fabric/identities/:username/enroll
+	posturl := "http://oneof_wallet:4000/fabric-cryptosuit/identities/" + enrollmentID + "/enroll"
 
 	body := []byte(`{}`)
 
@@ -110,8 +110,8 @@ func remoteEnroll(enrollmentID string) ([]byte, error) {
 
 func remoteRevoke(revokeReq mspApi.RevocationRequest) (*mspApi.RevocationResponse, error) {
 	fmt.Printf("revokeReq: %s\n", revokeReq.Name)
-	// send POST request to http://localhost:4000/fabric/identities/:username/revoke
-	posturl := "http://localhost:4000/fabric-cryptosuit/identities/" + revokeReq.Name + "/revoke"
+	// send POST request to http://oneof_wallet:4000/fabric/identities/:username/revoke
+	posturl := "http://oneof_wallet:4000/fabric-cryptosuit/identities/" + revokeReq.Name + "/revoke"
 
 	body := []byte(`{}`)
 

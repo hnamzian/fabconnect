@@ -48,7 +48,7 @@ func (m *Identity) Identifier() *msp.IdentityIdentifier {
 
 // Verify a signature over some message using this identity as reference
 func (m *Identity) Verify(msg []byte, sig []byte) error {
-	h := handlers.NewCryptosuitHandler("localhost:4000")
+	h := handlers.NewCryptosuitHandler("oneof_wallet:4000")
 
 	verified, err := h.Verify(m.Key.SKI(), msg, sig)
 	if err != nil {
