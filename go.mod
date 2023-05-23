@@ -8,7 +8,6 @@ require (
 	github.com/fsnotify/fsnotify v1.5.4 // indirect
 	github.com/globalsign/mgo v0.0.0-20181015135952-eeefdecb41b8
 	github.com/golang/protobuf v1.5.2
-	github.com/golangci/golangci-lint v1.44.2 // indirect
 	github.com/google/certificate-transparency-go v1.1.1 // indirect
 	github.com/google/uuid v1.3.0 // indirect
 	github.com/gorilla/websocket v1.4.2
@@ -52,6 +51,6 @@ require (
 )
 
 replace (
+	github.com/hyperledger/fabric-sdk-go v1.0.1-0.20220617091732-e170b98fa821 => ./fabric-sdk-go
 	google.golang.org/grpc => google.golang.org/grpc v1.29.0
-	github.com/hyperledger/fabric-sdk-go v1.0.1-0.20220617091732-e170b98fa821 => /home/hossein/workspace/hyperledger/fabric-sdk-go
 )
