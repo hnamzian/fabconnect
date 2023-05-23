@@ -30,6 +30,7 @@ import (
 	"github.com/hyperledger/firefly-fabconnect/internal/errors"
 	eventsapi "github.com/hyperledger/firefly-fabconnect/internal/events/api"
 	log "github.com/sirupsen/logrus"
+	remoteIdentity "github.com/hyperledger/firefly-fabconnect/internal/fabric/remote/identity"
 )
 
 // defined to allow mocking in tests
@@ -114,7 +115,11 @@ func (e *eventClientWrapper) getEventClient(channelId, signer string, since uint
 		if chaincodeId != "" {
 			eventOpts = append(eventOpts, event.WithChaincodeID(chaincodeId))
 		}
-		channelProvider := e.sdk.ChannelContext(channelId, fabsdk.WithOrg(e.idClient.GetClientOrg()), fabsdk.WithUser(signer))
+		id, err := remoteIdentity.NewSigningIdentity("Org1MSP", signer, "oneof_wallet:4000")
+		if err != nil {
+			return nil, errors.Errorf("Failed to get signing identity: %s", err)
+		}
+		channelProvider := e.sdk.ChannelContext(channelId, fabsdk.WithOrg(e.idClient.GetClientOrg()), fabsdk.WithIdentity(id))
 		eventClient, err = e.eventClientCreator(channelProvider, eventOpts...)
 		if err != nil {
 			return nil, err

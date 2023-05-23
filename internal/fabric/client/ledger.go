@@ -27,6 +27,8 @@ import (
 	"github.com/hyperledger/fabric-sdk-go/pkg/fabsdk"
 	"github.com/hyperledger/firefly-fabconnect/internal/errors"
 	"github.com/hyperledger/firefly-fabconnect/internal/fabric/utils"
+	remoteIdentity "github.com/hyperledger/firefly-fabconnect/internal/fabric/remote/identity"
+
 )
 
 // defined to allow mocking in tests
@@ -128,7 +130,12 @@ func (l *ledgerClientWrapper) getLedgerClient(channelId, signer string) (ledgerC
 	}
 	ledgerClient = ledgerClientsForSigner[channelId]
 	if ledgerClient == nil {
-		channelProvider := l.sdk.ChannelContext(channelId, fabsdk.WithOrg(l.idClient.GetClientOrg()), fabsdk.WithUser(signer))
+		id, err := remoteIdentity.NewSigningIdentity("Org1MSP", signer, "oneof_wallet:4000")
+		if err != nil {
+			return nil, errors.Errorf("Failed to get signing identity: %s", err)
+		}
+
+		channelProvider := l.sdk.ChannelContext(channelId, fabsdk.WithOrg(l.idClient.GetClientOrg()), fabsdk.WithIdentity(id))
 		ledgerClient, err = l.ledgerClientCreator(channelProvider)
 		if err != nil {
 			return nil, err
