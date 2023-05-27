@@ -35,6 +35,8 @@ import (
 	restutil "github.com/hyperledger/firefly-fabconnect/internal/rest/utils"
 	"github.com/julienschmidt/httprouter"
 	log "github.com/sirupsen/logrus"
+
+	remoteIdentity "github.com/hyperledger/firefly-fabconnect/internal/fabric/remote/identity"
 )
 
 type identityManagerProvider struct {
@@ -358,15 +360,22 @@ func (w *idClientWrapper) Get(res http.ResponseWriter, req *http.Request, params
 		}
 	}
 
-	// the SDK identity manager does not persist the certificates
-	// we have to retrieve it from the identity manager
-	si, err := w.identityMgr.GetSigningIdentity(username)
-	if err != nil && err != msp.ErrUserNotFound {
+	si, err := remoteIdentity.NewSigningIdentity("Org1MSP", newId.Name, "oneof_wallet:4000")
+	if err != nil {
 		return nil, restutil.NewRestError(err.Error(), 500)
 	}
+
+	// the SDK identity manager does not persist the certificates
+	// we have to retrieve it from the identity manager
+	// si, err := w.identityMgr.GetSigningIdentity(username)
+	// if err != nil && err != msp.ErrUserNotFound {
+	// 	return nil, restutil.NewRestError(err.Error(), 500)
+	// }
 	if err == nil {
 		// the user may have been enrolled by a different client instance
+		// ecert := si.EnrollmentCertificate()
 		ecert := si.EnrollmentCertificate()
+		fmt.Printf("ECERT: %s\n", ecert)
 		mspId := si.Identifier().MSPID
 		newId.MSPID = mspId
 		newId.EnrollmentCert = ecert
