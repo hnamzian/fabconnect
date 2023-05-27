@@ -28,6 +28,8 @@ import (
 	"github.com/hyperledger/fabric-sdk-go/pkg/fabsdk"
 	"github.com/hyperledger/fabric-sdk-go/pkg/gateway"
 	"github.com/hyperledger/firefly-fabconnect/internal/errors"
+
+	remoteIdentity "github.com/hyperledger/firefly-fabconnect/internal/fabric/remote/identity"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -225,7 +227,12 @@ func (w *gwRPCWrapper) getChannelClient(channelId, signer string) (channelClient
 		if err != nil {
 			return nil, err
 		}
-		clientChannelContext := sdk.ChannelContext(channelId, fabsdk.WithUser(signer), fabsdk.WithOrg(org))
+
+		id, err := remoteIdentity.NewSigningIdentity("Org1MSP", signer, "oneof_wallet:4000")
+		if err != nil {
+			return nil, errors.Errorf("Failed to get signing identity: %s", err)
+		}
+		clientChannelContext := sdk.ChannelContext(channelId, fabsdk.WithIdentity(id), fabsdk.WithOrg(org))
 		// Channel client is used to query and execute transactions (Org1 is default org)
 		channelClient, err = w.channelCreator(clientChannelContext)
 		if err != nil {
@@ -237,7 +244,13 @@ func (w *gwRPCWrapper) getChannelClient(channelId, signer string) (channelClient
 }
 
 func createGateway(configProvider core.ConfigProvider, signer string, txTimeout int) (*gateway.Gateway, error) {
-	return gateway.Connect(gateway.WithConfig(configProvider), gateway.WithUser(signer), gateway.WithTimeout(time.Duration(txTimeout)*time.Second))
+	// ToDo: Use WithIdentity
+	id, err := remoteIdentity.NewSigningIdentity("Org1MSP", signer, "oneof_wallet:4000")
+	if err != nil {
+		return nil, errors.Errorf("Failed to get signing identity: %s", err)
+	}
+	// wid := remoteWallet.NewWalletIdentity(signer, "Org1MSP", "oneof_wallet:4000")
+	return gateway.Connect(gateway.WithConfig(configProvider), gateway.WithSigningIdentity(id), gateway.WithTimeout(time.Duration(txTimeout)*time.Second))
 }
 
 func getNetwork(gateway *gateway.Gateway, channelId string) (*gateway.Network, error) {
