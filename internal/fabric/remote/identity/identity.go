@@ -143,7 +143,7 @@ func NewKey(id string, pubKey *ecdsa.PublicKey) *Key {
 }
 
 // Bytes converts this key to its byte representation.
-func (k *Key) Bytes() (raw []byte, err error) {
+func (k Key) Bytes() (raw []byte, err error) {
 	raw, err = x509.MarshalPKIXPublicKey(k.pubkey)
 	if err != nil {
 		return nil, fmt.Errorf("failed marshalling key [%s]", err)
@@ -152,7 +152,7 @@ func (k *Key) Bytes() (raw []byte, err error) {
 }
 
 // SKI returns the subject key identifier of this key.
-func (k *Key) SKI() (ski []byte) {
+func (k Key) SKI() (ski []byte) {
 	if k.pubkey == nil {
 		return nil
 	}
@@ -166,16 +166,16 @@ func (k *Key) SKI() (ski []byte) {
 }
 
 // Symmetric returns true if this key is a symmetric key, false otherwise.
-func (k *Key) Symmetric() bool {
+func (k Key) Symmetric() bool {
 	return false
 }
 
 // Private returns true if this key is a private key, false otherwise.
-func (k *Key) Private() bool {
+func (k Key) Private() bool {
 	return false
 }
 
 // PublicKey returns the corresponding public key part of an asymmetric public/private key pair.
-func (k *Key) PublicKey() (core.Key, error) {
+func (k Key) PublicKey() (core.Key, error) {
 	return k, nil
 }
